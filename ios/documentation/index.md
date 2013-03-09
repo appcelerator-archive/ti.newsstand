@@ -64,6 +64,8 @@ Setup the app as a Newsstand app by adding the following code to your tiapp.xml
 
 Modify the `UINewsstandBindingEdge` and `UINewsstandBindingType` values to get different decorations on the icons. Available options can be found in Apple's [CoreFoundationKeys Documentation](https://developer.apple.com/library/mac/#documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html).
 
+Add `newsstandicon.png` to the 'Resources/iphone' directory next to appicon.png
+
 ## Push Notifications
 
 Push notifications can be set to the device to notify it that a new issue is available. The notification payload must contain a "content-available" key set to 1. If this is not set, iOS will not allow the application to wake in the background to download a new issue.
