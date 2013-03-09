@@ -301,7 +301,6 @@ var rows = [
 				Ti.API.info('issue.date: '+issue.date);
 				Ti.API.info('issue.status: '+issue.status);
 				Ti.API.info('issue.contentURL: '+issue.contentURL);
-				
 				logInApp('Added issue to library: ' + issue.name);
 			} else {
 				Ti.API.info('Issue was not added to library');
@@ -322,10 +321,7 @@ var rows = [
 				Ti.API.info('issue.date: '+issue.date);
 				Ti.API.info('issue.status: '+issue.status);
 				Ti.API.info('issue.contentURL: '+issue.contentURL);
-				
 				logInApp('Retrieved issue from library: ' + issue.name);
-				
-				Ti.API.info('TEST '+ (issue.status == Newsstand.ISSUE_CONTENT_STATUS_NONE) );
 			} else {
 				Ti.API.info('Issue was not retrieved from library');
 				logInApp('Issue was not retrieved from library');
