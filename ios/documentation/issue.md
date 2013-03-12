@@ -16,6 +16,8 @@ Takes an object of arguments:
 	* **url** [string] (required): location of the asset to be downloaded
 	* **userInfo** [object] (optional): a dictionary of properties that can be passed through with the request to the event listeners. **Note:** Do not include anything more than simple key value pairs. Including Titanium objects in userInfo will cause errors. Noteworthy keys in userInfo
 	* **filename** [string]: the name of the file to be downloaded. If no name is specified here, the filename will be the last component of the url.
+	
+Throws and exception if called twice to download the same asset for a single issue.
 
 ## Properties
 
@@ -38,3 +40,4 @@ The status of the issue. Status options:
 ### Ti.Newsstand.Issue.contentURL [string] (read-only)
 
 The contentURL of the issue. This is the location assets downloaded for the issue will be saved.
+**Note:** contentURL will be undefined after an issue is removed from the library.

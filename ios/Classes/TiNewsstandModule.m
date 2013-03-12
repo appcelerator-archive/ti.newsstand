@@ -4,12 +4,16 @@
  * Please see the LICENSE included with this distribution for details.
  */
 
+#import <NewsstandKit/NewsstandKit.h>
 #import "TiNewsstandModule.h"
 #import "TiBase.h"
 #import "TiHost.h"
-#import "TiIssue.h"
+#import "TiNewsstandIssueProxy.h"
 
 @implementation TiNewsstandModule
+
+@synthesize username = _username;
+@synthesize password = _password;
 
 #pragma mark Internal
 
@@ -33,6 +37,7 @@
     // you *must* call the superclass
     [super startup];
 
+    // Pending downloads must be reconnected when the app starts or they will be cancelled
     [self checkForPendingDownloads];
     
     NSLog(@"[INFO] %@ loaded",self);
@@ -52,8 +57,8 @@
 
 -(void)dealloc
 {
-    [_username release];
-    [_password release];
+    RELEASE_TO_NIL(_username);
+    RELEASE_TO_NIL(_password);
     [super dealloc];
 }
 
@@ -79,7 +84,7 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
     NSLog(@"[INFO] Dev mode enabled");
 }
 
--(TiIssue*)addIssue:(id)args
+-(TiNewsstandIssueProxy*)addIssue:(id)args
 {
     ENSURE_SINGLE_ARG(args, NSDictionary);
     
@@ -97,23 +102,21 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
     }
     
     NKIssue *nkIssue = [[NKLibrary sharedLibrary] addIssueWithName:name date:date];
-    if (nkIssue)
-    {
-        return [[[TiIssue alloc] initWithIssue:nkIssue pageContext:[self executionContext] delegate:self] autorelease];
-    }
-    else
-    {
+    // nkIssue could be nil if the instance couldn’t be created
+    if (nkIssue == nil) {
         return nil;
     }
+    
+    return [[[TiNewsstandIssueProxy alloc] initWithIssue:nkIssue pageContext:[self executionContext] delegate:self] autorelease];
 }
 
 -(void)removeIssue:(id)args
 {
-    ENSURE_SINGLE_ARG(args, TiIssue);
-    [[NKLibrary sharedLibrary] removeIssue:[args issue]];
+    ENSURE_SINGLE_ARG(args, TiNewsstandIssueProxy);
+    [args removeIssueFromLibrary];
 }
 
--(TiIssue*)getIssue:(id)args
+-(TiNewsstandIssueProxy*)getIssue:(id)args
 {
     ENSURE_SINGLE_ARG(args, NSDictionary);
     
@@ -122,15 +125,13 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
     ENSURE_STRING(name);
     
     NKIssue *nkIssue = [[NKLibrary sharedLibrary] issueWithName:name];
-    if (nkIssue)
-    {
-        return [[[TiIssue alloc] initWithIssue:nkIssue pageContext:[self executionContext] delegate:self] autorelease];
-    }
-    else
-    {
+    // nkIssue my be nil if the issue couldn't be retrieved
+    if (nkIssue == nil) {
         NSLog(@"[ERROR] Issue named '%@' does not exist in library",name);
         return nil;
     }
+    
+    return [[[TiNewsstandIssueProxy alloc] initWithIssue:nkIssue pageContext:[self executionContext] delegate:self] autorelease];
 }
 
 // Set the username and password that will be used to authenticate if downloadAsset requires basic auth
@@ -138,17 +139,14 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 {
     ENSURE_SINGLE_ARG(args, NSDictionary);
     
-    NSString *user  = [args objectForKey:@"username"];
-    NSString *pass  = [args objectForKey:@"password"];
+    NSString *user;
+    NSString *pass;
     
-    ENSURE_STRING(user);
-    ENSURE_STRING(pass);
+    ENSURE_ARG_FOR_KEY(user, args, @"username", NSString);
+    ENSURE_ARG_FOR_KEY(pass, args, @"password", NSString);
     
-    [_username release];
-    [_password release];
-    
-    _username = [user retain];
-    _password = [pass retain];
+    self.username = user;
+    self.password = pass;
 }
 
 #pragma mark Properties
@@ -156,9 +154,9 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 -(NSArray*)issues
 {
     NSArray *issues = [[NKLibrary sharedLibrary] issues];
-    NSMutableArray *result = [NSMutableArray array];
+    NSMutableArray *result = [NSMutableArray arrayWithCapacity:[issues count]];
     [issues enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop){
-        [result addObject:[[[TiIssue alloc] initWithIssue:obj pageContext:[self executionContext] delegate:self] autorelease]];
+        [result addObject:[[[TiNewsstandIssueProxy alloc] initWithIssue:obj pageContext:[self executionContext] delegate:self] autorelease]];
     }];
     
     return result;
@@ -166,14 +164,14 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)setCurrentlyReadingIssue:(id)args
 {
-    ENSURE_SINGLE_ARG(args, TiIssue);
-    [[NKLibrary sharedLibrary] setCurrentlyReadingIssue:[args issue]];
+    ENSURE_SINGLE_ARG(args, TiNewsstandIssueProxy);
+    [args setCurrentlyReading];
 }
 
--(TiIssue*)currentlyReadingIssue
+-(TiNewsstandIssueProxy*)currentlyReadingIssue
 {
     NKIssue *nkIssue = [[NKLibrary sharedLibrary] currentlyReadingIssue];
-    return nkIssue ? [[[TiIssue alloc] initWithIssue:nkIssue pageContext:[self executionContext] delegate:self] autorelease] : nil;
+    return nkIssue ? [[[TiNewsstandIssueProxy alloc] initWithIssue:nkIssue pageContext:[self executionContext] delegate:self] autorelease] : nil;
 }
 
 -(void)setIconImage:(id)args
@@ -191,7 +189,7 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 // Will display the "new" badge if number is greater than 0
 -(void)setApplicationIconBadgeNumber:(id)args
 {
-    ENSURE_TYPE(args, NSNumber);
+    ENSURE_SINGLE_ARG(args, NSNumber);
 
     NSLog(@"[INFO] Setting app badge number to %@",args);
     
@@ -207,40 +205,22 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    NKAssetDownload *dnl        = connection.newsstandAssetDownload;
-    NKIssue *nkIssue            = dnl.issue;
-    NSString *errorDescription  = [error localizedDescription];
-    NSNumber *errorCode         = [NSNumber numberWithInteger:[error code]];
-    NSDictionary *userInfo      = [[dnl userInfo] objectForKey:@"userInfo"];
-    userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
-    
-    if ([self _hasListeners:@"error"])
-    {
-        NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-                               [nkIssue name], @"name",
-                               userInfo, @"userInfo",
-                               errorDescription, @"description",
-                               errorCode, @"code",
-                               nil
-                               ];
-        [self fireEvent:@"error" withObject:event];
-    }
+    [self fireErrorEvent:connection error:error];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    if ([challenge previousFailureCount] == 0) {
-        NSLog(@"[INFO] Received authentication challenge");
-        NSURLCredential *newCredential = [NSURLCredential credentialWithUser:_username
-                                                                    password:_password
-                                                                 persistence:NSURLCredentialPersistenceNone];
-        
-        [[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
-        NSLog(@"[INFO] Responded to authentication challenge");
-    }
-    else {
+    if ([challenge previousFailureCount] != 0) {
         [[challenge sender] cancelAuthenticationChallenge:challenge];
+        return;
     }
+    
+    NSURLCredential *newCredential = [NSURLCredential credentialWithUser:self.username
+                                                                password:self.password
+                                                             persistence:NSURLCredentialPersistenceNone];
+    
+    [[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
+    NSLog(@"[INFO] Responded to authentication challenge");
 }
 
 -(void)connection:(NSURLConnection *)connection didWriteData:(long long)bytesWritten totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes
@@ -257,75 +237,41 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 {
     NKAssetDownload *dnl        = connection.newsstandAssetDownload;
     NKIssue *nkIssue            = dnl.issue;
-    NSDictionary *userInfo      = [[dnl userInfo] objectForKey:@"userInfo"];
-    userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
     
     NSString *tempFileName      = [[dnl userInfo] objectForKey:@"filename"]; // use filename provided in userInfo if it exists
     NSString *fileName          = (tempFileName) ? tempFileName : [[dnl.URLRequest URL] lastPathComponent];
-    NSString *filePath       = [[nkIssue.contentURL path] stringByAppendingPathComponent:fileName];
-    NSError *moveError          = nil;
-    NSError *removeError        = nil;
-    
-    void (^fireErrorEvent)(NSError*) = ^(NSError *error) {
-        NSString *errorCode         = [NSString stringWithFormat:@"%d", error.code];
-        NSString *errorDescription  = [NSString stringWithFormat:@"%@", error.localizedDescription];
-        
-        if ([self _hasListeners:@"error"])
-        {
-            NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-                                   [nkIssue name], @"name",
-                                   userInfo, @"userInfo",
-                                   errorDescription, @"description",
-                                   errorCode, @"code",
-                                   nil
-                                   ];
-            [self fireEvent:@"error" withObject:event];
-        }
-    };
+    NSString *filePath          = [[nkIssue.contentURL path] stringByAppendingPathComponent:fileName];
+    NSError *error              = nil;
     
     NSLog(@"[INFO] File is being copied to %@",filePath);
-    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
-    {        
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {        
         NSLog(@"[ERROR] Overwriting file named '%@'. See module documentation to learn how to specify a downloaded file's filename.",fileName);
-        if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:&removeError] == NO)
-        {
-            fireErrorEvent(removeError);
+        if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:&error] == NO) {
+            [self fireErrorEvent:connection error:error];
+            return;
         }
     }
     
-    if ([[NSFileManager defaultManager] moveItemAtPath:[destinationURL path] toPath:filePath error:&moveError] == NO)
-    {
-        fireErrorEvent(moveError);
+    if ([[NSFileManager defaultManager] moveItemAtPath:[destinationURL path] toPath:filePath error:&error] == NO) {
+        [self fireErrorEvent:connection error:error];
+        return;
     }
-    else
-    {
-        if ([self _hasListeners:@"assetcomplete"])
-        {
-            NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-                                   [nkIssue name], @"name",
-                                   userInfo, @"userInfo",
-                                   filePath, @"filePath",
-                                   nil
-                                   ];
-            [self fireEvent:@"assetcomplete" withObject:event];
-        }
-    }
+    
+    [self fireAssetCompleteEvent:connection filePath:filePath];
 }
 
 #pragma mark Listener Notifications
 
 -(void)_listenerAdded:(NSString *)type count:(int)count
 {
-    if (count == 1 && [type isEqualToString:@"issuecomplete"])
-    {
+    if (count == 1 && [type isEqualToString:@"issuecomplete"]) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(issueDownloadComplete:) name:NKIssueDownloadCompletedNotification object:nil];
     }
 }
 
 -(void)_listenerRemoved:(NSString *)type count:(int)count
 {
-    if (count == 0 && [type isEqualToString:@"issuecomplete"])
-    {
+    if (count == 0 && [type isEqualToString:@"issuecomplete"]) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
 }
@@ -334,16 +280,32 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)issueDownloadComplete:(NSNotification *)note
 {
-    NSDictionary *event = [NSDictionary dictionaryWithObject:[[note object] name] forKey:@"name"];
-    [self fireEvent:@"issuecomplete" withObject:event];
+    [self fireIssueCompleteEvent:note];
 }
 
-#pragma mark Utils
+#pragma mark Fire Events
+
+-(void)fireErrorEvent:(NSURLConnection *)connection error:(NSError *)error
+{
+    NKAssetDownload *dnl        = connection.newsstandAssetDownload;
+    NSDictionary *userInfo      = [[dnl userInfo] objectForKey:@"userInfo"];
+    userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
+    
+    if ([self _hasListeners:@"error"]) {
+        NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
+                               [[dnl issue] name], @"name",
+                               userInfo, @"userInfo",
+                               [error localizedDescription], @"description",
+                               [NSNumber numberWithInteger:[error code]], @"code",
+                               nil
+                               ];
+        [self fireEvent:@"error" withObject:event];
+    }
+}
 
 -(void)fireProgressEvent:(NSURLConnection *)connection totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes
 {
-    if ([self _hasListeners:@"progress"])
-    {
+    if ([self _hasListeners:@"progress"]) {
         NKAssetDownload *dnl    = connection.newsstandAssetDownload;
         NSDictionary *userInfo  = [[dnl userInfo] objectForKey:@"userInfo"];
         userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
@@ -360,11 +322,39 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
     }
 }
 
-// Pending downloads must be reconnected when the app starts or they will be cancelled
+-(void)fireAssetCompleteEvent:(NSURLConnection *)connection filePath:(NSString *)filePath
+{
+    NKAssetDownload *dnl        = connection.newsstandAssetDownload;
+    NSDictionary *userInfo      = [[dnl userInfo] objectForKey:@"userInfo"];
+    userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
+    
+    if ([self _hasListeners:@"assetcomplete"]) {
+        NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
+                               [[dnl issue] name], @"name",
+                               userInfo, @"userInfo",
+                               filePath, @"filePath",
+                               nil
+                               ];
+        [self fireEvent:@"assetcomplete" withObject:event];
+    }
+}
+
+-(void)fireIssueCompleteEvent:(NSNotification *)note
+{
+    NSDictionary *event = [NSDictionary dictionaryWithObject:[[note object] name] forKey:@"name"];
+    [self fireEvent:@"issuecomplete" withObject:event];
+}
+
+#pragma mark Utils
+
+// The downloadingAssets array holds any downloading assets for any issues.
+// (A downloading asset is represented by a NKAssetDownload object.) A newsstand content
+// application should, when it launches, iterate through this array and call
+// downloadWithDelegate: on each item to have the downloaded assets completely processed.
+// If this is not done at launch, the downloads will be canceled.
 -(void)checkForPendingDownloads
 {
-    for(NKAssetDownload *asset in [[NKLibrary sharedLibrary] downloadingAssets])
-    {
+    for(NKAssetDownload *asset in [[NKLibrary sharedLibrary] downloadingAssets]) {
         [asset downloadWithDelegate:self];
     }
 }

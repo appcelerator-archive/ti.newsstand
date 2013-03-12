@@ -4,13 +4,15 @@
  * Please see the LICENSE included with this distribution for details.
  */
 
+#import <Foundation/Foundation.h>
 #import "TiModule.h"
-#import <NewsstandKit/NewsstandKit.h>
 
 @interface TiNewsstandModule : TiModule <NSURLConnectionDownloadDelegate>
 {
-    NSString *_username;
-    NSString *_password;
+    
 }
+@property(readwrite, nonatomic, copy) NSString *username;
+@property(readwrite, nonatomic, copy) NSString *password;
+
 
 @end

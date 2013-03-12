@@ -19,12 +19,6 @@ module.exports = new function ()
 		finish = testUtils.finish;
 		valueOf = testUtils.valueOf;
 		Newsstand = require('ti.newsstand');
-		
-		// Ensure that there are no issues in library before starting tests
-		var library = Newsstand.issues;
-		for (var i = 0, j = library.length; i < j; i++) {
-			Newsstand.removeIssue(library.pop());
-		}
 	};
 
 	this.name = "newsstand";
@@ -85,6 +79,17 @@ module.exports = new function ()
 		finish(testRun);
 	};
 	
+	this.testSetup = function (testRun)
+	{
+		// Ensure that there are no issues in library before starting tests
+		var library = Newsstand.issues;
+		for (var i = 0, j = library.length; i < j; i++) {
+			Newsstand.removeIssue(library.pop());
+		}
+		
+		finish(testRun);
+	}
+	
 	this.testIssueProxy = function (testRun)
 	{
 		var name = 'test-issue';
@@ -122,7 +127,7 @@ module.exports = new function ()
 		valueOf(testRun, issue.status).shouldNotBeUndefined();
 		valueOf(testRun, issue.contentURL).shouldBeUndefined();
 		valueOf(testRun, issue.downloadAsset).shouldBeFunction();
-
+		
 		finish(testRun);
 	};
 	

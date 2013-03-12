@@ -28,8 +28,8 @@
 		24DE9E1211C5FE74003F90F6 /* TiNewsstandModuleAssets.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DE9E1011C5FE74003F90F6 /* TiNewsstandModuleAssets.m */; };
 		AA747D9F0F9514B9006C5449 /* TiNewsstand_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* TiNewsstand_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
-		CE2A871C16E529F200144F5A /* TiIssue.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2A871A16E529F200144F5A /* TiIssue.h */; };
-		CE2A871D16E529F200144F5A /* TiIssue.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2A871B16E529F200144F5A /* TiIssue.m */; };
+		CE2A871C16E529F200144F5A /* TiNewsstandIssueProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2A871A16E529F200144F5A /* TiNewsstandIssueProxy.h */; };
+		CE2A871D16E529F200144F5A /* TiNewsstandIssueProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2A871B16E529F200144F5A /* TiNewsstandIssueProxy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,8 +50,8 @@
 		24DE9E1011C5FE74003F90F6 /* TiNewsstandModuleAssets.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiNewsstandModuleAssets.m; path = Classes/TiNewsstandModuleAssets.m; sourceTree = "<group>"; };
 		AA747D9E0F9514B9006C5449 /* TiNewsstand_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TiNewsstand_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		CE2A871A16E529F200144F5A /* TiIssue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiIssue.h; path = Classes/TiIssue.h; sourceTree = "<group>"; };
-		CE2A871B16E529F200144F5A /* TiIssue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiIssue.m; path = Classes/TiIssue.m; sourceTree = "<group>"; };
+		CE2A871A16E529F200144F5A /* TiNewsstandIssueProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiNewsstandIssueProxy.h; path = Classes/TiNewsstandIssueProxy.h; sourceTree = "<group>"; };
+		CE2A871B16E529F200144F5A /* TiNewsstandIssueProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiNewsstandIssueProxy.m; path = Classes/TiNewsstandIssueProxy.m; sourceTree = "<group>"; };
 		D2AAC07E0554694100DB518D /* libTiNewsstand.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libTiNewsstand.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -97,8 +97,8 @@
 		08FB77AEFE84172EC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				CE2A871A16E529F200144F5A /* TiIssue.h */,
-				CE2A871B16E529F200144F5A /* TiIssue.m */,
+				CE2A871A16E529F200144F5A /* TiNewsstandIssueProxy.h */,
+				CE2A871B16E529F200144F5A /* TiNewsstandIssueProxy.m */,
 				24DE9E0F11C5FE74003F90F6 /* TiNewsstandModuleAssets.h */,
 				24DE9E1011C5FE74003F90F6 /* TiNewsstandModuleAssets.m */,
 				24DD6CF71134B3F500162E58 /* TiNewsstandModule.h */,
@@ -126,7 +126,7 @@
 				AA747D9F0F9514B9006C5449 /* TiNewsstand_Prefix.pch in Headers */,
 				24DD6CF91134B3F500162E58 /* TiNewsstandModule.h in Headers */,
 				24DE9E1111C5FE74003F90F6 /* TiNewsstandModuleAssets.h in Headers */,
-				CE2A871C16E529F200144F5A /* TiIssue.h in Headers */,
+				CE2A871C16E529F200144F5A /* TiNewsstandIssueProxy.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,7 +199,7 @@
 			files = (
 				24DD6CFA1134B3F500162E58 /* TiNewsstandModule.m in Sources */,
 				24DE9E1211C5FE74003F90F6 /* TiNewsstandModuleAssets.m in Sources */,
-				CE2A871D16E529F200144F5A /* TiIssue.m in Sources */,
+				CE2A871D16E529F200144F5A /* TiNewsstandIssueProxy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +246,7 @@
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				INSTALL_PATH = /usr/local/lib;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = (
 					"-DDEBUG",
@@ -292,7 +293,7 @@
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				INSTALL_PATH = /usr/local/lib;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "-DTI_POST_1_2";
 				OTHER_LDFLAGS = "-ObjC";

@@ -74,9 +74,9 @@
         <module platform="iphone" version="1.0.0">ti.newsstand</module>
     </modules>
 	<!-- The url must point to a server with basic authentication for all of the tests in the 'auth' suite to pass -->
-	<property name="basic_auth.url">http://serverwithbasicauth.com/AppDB.zip</property>
-	<property name="basic_auth.username">jalter</property>
-	<property name="basic_auth.password">password</property>
-	<property name="basic_auth.bad_username">notjalter</property>
+	<property name="basic_auth.url">SERVER_URL_HERE</property>
+	<property name="basic_auth.username">USERNAME_HERE</property>
+	<property name="basic_auth.password">PASSWORD_HERE</property>
+	<property name="basic_auth.bad_username">badusername</property>
 	<property name="basic_auth.bad_password">badpassword</property>
 </ti:app>

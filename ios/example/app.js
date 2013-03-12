@@ -41,84 +41,6 @@
  *
  */
 
-////////////////////////////////////////////////////////
-// Urban Airship
-// Uncomment the code below to use Urban Airship
-////////////////////////////////////////////////////////
-
-/**
-var UrbanAirship = require('ti.urbanairship');
-
-UrbanAirship.tags = [ 'testingtesting', 'appcelerator', 'my-tags' ];
-UrbanAirship.alias = 'testDevice';
-UrbanAirship.autoBadge = true;
-UrbanAirship.autoResetBadge = true;
-
-function eventCallback(e) {
-	// Pass the notification to the module
-    UrbanAirship.handleNotification(e.data);
-   
-  	Ti.API.info('Push message received');
-  	Ti.API.info('  Message: ' + e.data.alert);
-  	Ti.API.info('  Payload: ' + e.data.aps);
-  	Ti.API.info('  Content-Available: ' + e.data['content-available']);
-  	
-  	if (e.data['content-available'] === 1) {
-  			var name = issues[0].name;
-			var content = issues[0].content;
-			
-			Ti.API.info('Downloading asset for issue: '+name+' from URL: '+content);
-			
-			var issue = Newsstand.getIssue({
-				name: name
-			});
-			
-			if (!issue) {
-				// if issue is not found then add it
-				issue = Newsstand.addIssue({
-					name: name,
-					date: new Date()
-				});
-			}
-			
-			issue.downloadAsset({
-				url: content,
-				userInfo: {
-					id: 9999,
-					name: 'TESTBACKGROUND'
-				}
-			});
-  	}
-}
-
-function eventSuccess(e) {
-	// *MUST* pass the received token to the module
-    UrbanAirship.registerDevice(e.deviceToken);  
-    
-    Ti.API.info('Received device token: ' + e.deviceToken);
-}
-
-function eventError(e) {
-    Ti.API.info('Error:' + e.error);
-    var alert = Ti.UI.createAlertDialog({
-        title: 'Error',
-        message: e.error
-    });
-    alert.show();	
-}
-
-Ti.Network.registerForPushNotifications({
-    types:[
-        // Ti.Network.NOTIFICATION_TYPE_BADGE,
-        // Ti.Network.NOTIFICATION_TYPE_ALERT,
-        // Ti.Network.NOTIFICATION_TYPE_SOUND
-        Ti.Network.NOTIFICATION_TYPE_NEWSSTAND
-    ],
-    success: eventSuccess,
-    error: eventError,
-    callback: eventCallback
-});
-*/
 
 ////////////////////////////////////////////////////////
 // Cloud Push
@@ -126,6 +48,11 @@ Ti.Network.registerForPushNotifications({
 ////////////////////////////////////////////////////////
 
 /**
+// Set the username and password to be used to login to ti.cloud.
+// If the user does not exist, it will be created.
+var cloudUsername = '<<USERNAME>>';
+var cloudPassword = '<<PASSWORD>>';
+
 var Cloud = require('ti.cloud');
 Cloud.debug = true;
 
@@ -207,9 +134,6 @@ function registerForPush() {
 	    callback: eventCallback
 	});
 }
-
-var cloudUsername = 'jalter';
-var cloudPassword = 'password';
 
 function loginToCloud() {
 	Cloud.Users.login({
@@ -350,7 +274,7 @@ var rows = [
 			for (var i = 0, j = library.length; i < j; i++) {
 				var issue = library.pop();
 				Newsstand.removeIssue(issue);
-				Ti.API.info('removed issue ' + issue.name + 'from library');
+				Ti.API.info('removed issue ' + issue.name + ' from library');
 			}
 			logInApp('Removed all issues from library');
 		}
@@ -440,8 +364,8 @@ var Newsstand = require('ti.newsstand');
 Newsstand.enableDevMode(); 
 // Sets credentials to be used if 'downloadAsset' needs to authenticate
 Newsstand.setBasicAuthentication({
-	username: 'jalter',
-	password: 'password'
+	username: '<<USERNAME>>',
+	password: '<<PASSWORD>>'
 });
 
 Newsstand.addEventListener('progress', function(e){

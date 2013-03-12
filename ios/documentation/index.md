@@ -26,7 +26,13 @@ started with using this module in your application.
 
 ## Setup
 
-Setup the app as a Newsstand app by adding the following code to your tiapp.xml
+1. Setup the app as a Newsstand app by adding the code below to your tiapp.xml
+2. Modify the `UINewsstandBindingEdge` and `UINewsstandBindingType` values to get different decorations on the icons. Available options can be found in Apple's [CoreFoundationKeys Documentation](https://developer.apple.com/library/mac/#documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html).
+3. Add `newsstandicon.png` to the 'Resources/iphone' directory next to appicon.png
+4. Run the app, you should see it in the Newsstand folder.
+5. Durring development, be sure to call `enableDevMode()` to remove the daily download limit.
+
+tiapp.xml
 
 	<ios>
         <plist>
@@ -62,19 +68,15 @@ Setup the app as a Newsstand app by adding the following code to your tiapp.xml
         </plist>
     </ios>
 
-Modify the `UINewsstandBindingEdge` and `UINewsstandBindingType` values to get different decorations on the icons. Available options can be found in Apple's [CoreFoundationKeys Documentation](https://developer.apple.com/library/mac/#documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html).
-
-Add `newsstandicon.png` to the 'Resources/iphone' directory next to appicon.png
-
 ## Push Notifications
 
-Push notifications can be set to the device to notify it that a new issue is available. The notification payload must contain a "content-available" key set to 1. If this is not set, iOS will not allow the application to wake in the background to download a new issue.
+Push notifications can be sent to the device to notify it that a new issue is available. The notification payload must contain a "content-available" key set to 1. If this is not set, iOS will not allow the application to wake in the background to download a new issue.
 
 	{
 	  "aps":{
 		"content-available":1,
 	        },
-	   "device_tokens": ["J298BF42A7D91B8F3304F2509D125889AED3466F4D1376B26C374190B3974739"]
+	   "device_tokens": ["exampleToken4F2509D125889AED3466F4D1376B26C374190B3974739"]
 	}
 	
 Use the `Ti.Network.NOTIFICATION_TYPE_NEWSSTAND` type when calling **registerForPushNotifications**
@@ -137,7 +139,7 @@ Retrieves an issue from the library, via its unique name.
 * args [object]
 	* name [string] (required): unique name of the issue to be retrieved from the library
 	
-* returns: a [Ti.Newsstand.Issue] representing the issue or undefined if the issues does not exist in the library.
+* returns: a [Ti.Newsstand.Issue] representing the issue or undefined if the issues does not exist in the library
 
 #### Example
 	
@@ -150,6 +152,8 @@ Retrieves an issue from the library, via its unique name.
 Removes an issue from the library.
 
 * issue [[Ti.Newsstand.Issue]] (required): the issue to be removed
+
+**Note:** Properties of [Ti.Newsstand.Issue] will still be accessible after an issue is removed from the library. This does not apply to `contentURL` which will be undefined. 
 
 #### Example
 
@@ -249,9 +253,6 @@ Occurs when each asset download completes. The following event information will 
 Occurs when all the assets downloads that have been started for an issue are complete. This could be a successful completion or error. The following event information will be provided:
 
 * name [string]: the unique name of the issue
-
-**Note:** issue complete will 
-
 
 ## Usage
 

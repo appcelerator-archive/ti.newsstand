@@ -38,6 +38,17 @@ module.exports = new function ()
 	// Auth
 	// ---------------------------------------------------------------
 	
+	this.testSetup = function (testRun)
+	{
+		// Ensure that there are no issues in library before starting tests
+		var library = Newsstand.issues;
+		for (var i = 0, j = library.length; i < j; i++) {
+			Newsstand.removeIssue(library.pop());
+		}
+		
+		finish(testRun);
+	}
+	
 	this.testWithOutCreds = function (testRun)
 	{
 		var name = 'test-issue';
@@ -72,6 +83,38 @@ module.exports = new function ()
 		
 		Newsstand.addEventListener('error', function(e) {
 			valueOf(testRun, e).shouldBeObject();
+			
+			// Clean up
+			Newsstand.removeIssue(issue);
+
+			finish(testRun);
+		});
+		
+		Newsstand.setBasicAuthentication({
+			username: bad_username,
+			password: bad_password
+		});
+		
+		issue.downloadAsset({
+			url: assetURL
+		});
+	};
+	
+	this.testErrorEvent = function (testRun)
+	{
+		var name = 'test-issue';
+		var date = new Date();
+		var issue = Newsstand.addIssue({
+			name: name,
+			date: date
+		});
+		
+		Newsstand.addEventListener('error', function(e) {
+			valueOf(testRun, e).shouldBeObject();
+			valueOf(testRun, e.name).shouldBe(name);
+			valueOf(testRun, e.userInfo).shouldBeObject();
+			valueOf(testRun, e.description).shouldBeString();
+			valueOf(testRun, e.code).shouldBeNumber();
 			
 			// Clean up
 			Newsstand.removeIssue(issue);
