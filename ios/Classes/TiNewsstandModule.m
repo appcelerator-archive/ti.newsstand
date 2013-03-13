@@ -280,8 +280,6 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)issueDownloadComplete:(NSNotification *)note
 {
-    // Not checking for _hasListeners here because this method will only be called
-    // if there is a listener, see _listenerAdded:count: and _listenerRemoved:count:
     [self fireIssueCompleteEvent:note];
 }
 
@@ -343,6 +341,8 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)fireIssueCompleteEvent:(NSNotification *)note
 {
+    // Not checking for _hasListeners here because this method will only be called
+    // if there is a listener, see _listenerAdded:count: and _listenerRemoved:count:
     NSDictionary *event = [NSDictionary dictionaryWithObject:[[note object] name] forKey:@"name"];
     [self fireEvent:@"issuecomplete" withObject:event];
 }
