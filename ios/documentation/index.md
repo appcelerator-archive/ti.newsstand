@@ -109,14 +109,15 @@ Newsstand push notifications are only allowed one background download per day. T
 
 	Newsstand.enableDevMode();
 	
-### [Ti.Newsstand.Issue] addIssue(args[object]) 
+### [Ti.Newsstand.Issue][] addIssue(args[object]) 
 
 Adds an issues to the library.
+
 * args [object]
 	* name [string] (required): unique name of the issue to be added to the library
 	* date [Date] (required): release date of the issue
 
-* returns: a [Ti.Newsstand.Issue] representing the issue that was added to the library or undefined if the issues does not exist in the library.
+* returns: a [Ti.Newsstand.Issue][] representing the issue that was added to the library or undefined if the issues does not exist in the library.
 
 Throws an exception if name and date are invalid. Also throws an exception if you use a name that is already taken by another issue.
 
@@ -132,14 +133,14 @@ Throws an exception if name and date are invalid. Also throws an exception if yo
 		date: issueDate
 	});
 
-### [Ti.Newsstand.Issue] getIssue(args[object])
+### [Ti.Newsstand.Issue][] getIssue(args[object])
 
 Retrieves an issue from the library, via its unique name.
 
 * args [object]
 	* name [string] (required): unique name of the issue to be retrieved from the library
 	
-* returns: a [Ti.Newsstand.Issue] representing the issue or undefined if the issues does not exist in the library
+* returns: a [Ti.Newsstand.Issue][] representing the issue or undefined if the issues does not exist in the library
 
 #### Example
 	
@@ -147,19 +148,16 @@ Retrieves an issue from the library, via its unique name.
 		name: "Magazine-0"
 	});
 
-### void removeIssue(issue[[Ti.Newsstand.Issue]])
+### void removeIssue(issue[[Ti.Newsstand.Issue][]])
 
 Removes an issue from the library.
 
-* issue [[Ti.Newsstand.Issue]] (required): the issue to be removed
+* issue [[Ti.Newsstand.Issue][]] (required): the issue to be removed
 
-**Note:** Properties of [Ti.Newsstand.Issue] will still be accessible after an issue is removed from the library. This does not apply to `contentURL` which will be undefined. 
+**Note:** Properties of [Ti.Newsstand.Issue][] will still be accessible after an issue is removed from the library. This does not apply to `contentURL` which will be undefined. 
 
 #### Example
 
-	var issueToRemove = Newsstand.getIssue({
-		name: "Magazine-0"
-	});
 	Newsstand.removeIssue(issueToRemove);
 
 ### void setBasicAuthentication(args[object])
@@ -181,9 +179,9 @@ Sets the username and password that will be used if the `downloadAsset` call nee
 
 ### issues [array] (readonly)
 
-Returns an array of [Ti.Newsstand.Issue]s representing the current issues in the library.
+Returns an array of [Ti.Newsstand.Issue][]s representing the current issues in the library.
 
-### currentlyReadingIssue [[Ti.Newsstand.Issue]]
+### currentlyReadingIssue \[[Ti.Newsstand.Issue][]\]
 
 Accesses or sets the newsstand issue that the user is currently reading. If no issue is set, it will be undefined.
 
@@ -208,15 +206,15 @@ Sets the image of the application icon.
 
 ## Constants
 
-### ISSUE_CONTENT_STATUS_NONE [int]
+### ISSUE\_CONTENT\_STATUS\_NONE [int]
 
 Assets are not downloading for the issue and there is no content at contentURL.
 
-### ISSUE_CONTENT_STATUS_DOWNLOADING [int]
+### ISSUE\_CONTENT\_STATUS\_DOWNLOADING [int]
 
 The issue has assets that are currently downloading.
 
-### ISSUE_CONTENT_STATUS_AVAILABLE [int]
+### ISSUE\_CONTENT\_STATUS\_AVAILABLE [int]
 
 Downloading of assets is not taking place and there is issue content at contentURL.
 

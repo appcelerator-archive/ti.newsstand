@@ -13,9 +13,9 @@ Downloads an asset for this issue. This connection is managed by the system. Thi
 Takes an object of arguments:
 
 * args [object]
-	* **url** [string] (required): location of the asset to be downloaded
-	* **userInfo** [object] (optional): a dictionary of properties that can be passed through with the request to the event listeners. **Note:** Do not include anything more than simple key value pairs. Including Titanium objects in userInfo will cause errors. Noteworthy keys in userInfo
-	* **filename** [string]: the name of the file to be downloaded. If no name is specified here, the filename will be the last component of the url.
+	* url [string] (required): location of the asset to be downloaded
+	* userInfo [object] (optional): a dictionary of properties that can be passed through with the request to the event listeners. **Note:** Do not include anything more than simple key value pairs. Including Titanium objects in userInfo will cause errors. Noteworthy keys in userInfo
+	* filename [string]: the name of the file to be downloaded. If no name is specified here, the filename will be the last component of the url.
 	
 Throws an exception if called twice to download the same asset for a single issue.
 
@@ -33,9 +33,9 @@ The date of the issue.
 
 The status of the issue. Status options:
 
-* Newsstand.ISSUE_CONTENT_STATUS_NONE
-* Newsstand.ISSUE_CONTENT_STATUS_DOWNLOADING
-* Newsstand.ISSUE_CONTENT_STATUS_AVAILABLE
+* Newsstand.ISSUE\_CONTENT\_STATUS\_NONE
+* Newsstand.ISSUE\_CONTENT\_STATUS\_DOWNLOADING
+* Newsstand.ISSUE\_CONTENT\_STATUS\_AVAILABLE
 
 ### Ti.Newsstand.Issue.contentURL [string] (read-only)
 
