@@ -30,7 +30,7 @@ started with using this module in your application.
 2. Modify the `UINewsstandBindingEdge` and `UINewsstandBindingType` values to get different decorations on the icons. Available options can be found in Apple's [CoreFoundationKeys Documentation](https://developer.apple.com/library/mac/#documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html).
 3. Add `newsstandicon.png` to the 'Resources/iphone' directory next to appicon.png
 4. Run the app, you should see it in the Newsstand folder.
-5. Durring development, be sure to call `enableDevMode()` to remove the daily download limit.
+5. During development, be sure to call `enableDevMode()` to remove the daily download limit.
 
 tiapp.xml
 
@@ -157,6 +157,9 @@ Removes an issue from the library.
 
 #### Example
 
+	var issueToRemove = Newsstand.getIssue({
+		name: "Magazine-0"
+	});
 	Newsstand.removeIssue(issueToRemove);
 
 ### void setBasicAuthentication(args[object])
@@ -250,7 +253,7 @@ Occurs when each asset download completes. The following event information will 
 
 ### issuecomplete
 
-Occurs when all the assets downloads that have been started for an issue are complete. This could be a successful completion or error. The following event information will be provided:
+Occurs when all of the asset downloads that have been started for an issue are complete. This could be a successful completion or error. The following event information will be provided:
 
 * name [string]: the unique name of the issue
 

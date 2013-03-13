@@ -24,12 +24,6 @@ module.exports = new function ()
 		finish = testUtils.finish;
 		valueOf = testUtils.valueOf;
 		Newsstand = require('ti.newsstand');
-		
-		// Ensure that there are no issues in library before starting tests
-		var library = Newsstand.issues;
-		for (var i = 0, j = library.length; i < j; i++) {
-			Newsstand.removeIssue(library.pop());
-		}
 	};
 
 	this.name = "auth";

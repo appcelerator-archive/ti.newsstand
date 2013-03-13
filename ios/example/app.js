@@ -3,7 +3,7 @@
  * 1. To fully test this the app, you will need to setup push notifications for the app with ACS http://cloud.appcelerator.com/docs/ios#push
  * 		* Push notifications need to have the 'content-available' key set to 1 in 'aps' object
  * 2. Add newsstandicon.png to the 'Resources/iphone' directory next to appicon.png
- * 2. Before running this example app, add this to your tiapp.xml
+ * 3. Before running this example app, add this to your tiapp.xml
  * 
 <ios>
     <plist>
@@ -360,7 +360,7 @@ var rows = [
 ];
 
 var Newsstand = require('ti.newsstand');
-// Removes the one the 1 background download a day limit
+// Removes the one background download a day limit
 Newsstand.enableDevMode(); 
 // Sets credentials to be used if 'downloadAsset' needs to authenticate
 Newsstand.setBasicAuthentication({

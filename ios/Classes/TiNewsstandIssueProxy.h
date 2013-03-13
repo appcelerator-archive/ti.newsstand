@@ -9,7 +9,7 @@
 
 @interface TiNewsstandIssueProxy : TiProxy
 {
-    @private
+@private
     id _delegate;
     NKIssue *_issue;
 }

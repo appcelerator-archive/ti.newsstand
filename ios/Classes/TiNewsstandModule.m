@@ -12,8 +12,7 @@
 
 @implementation TiNewsstandModule
 
-@synthesize username = _username;
-@synthesize password = _password;
+@synthesize username, password;
 
 #pragma mark Internal
 
@@ -57,8 +56,8 @@
 
 -(void)dealloc
 {
-    RELEASE_TO_NIL(_username);
-    RELEASE_TO_NIL(_password);
+    username = nil;
+    password = nil;
     [super dealloc];
 }
 
@@ -104,6 +103,7 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
     NKIssue *nkIssue = [[NKLibrary sharedLibrary] addIssueWithName:name date:date];
     // nkIssue could be nil if the instance couldn’t be created
     if (nkIssue == nil) {
+        NSLog(@"[ERROR] issue named '%@' could not be created",name);
         return nil;
     }
     
@@ -245,7 +245,7 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
     
     NSLog(@"[INFO] File is being copied to %@",filePath);
     if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {        
-        NSLog(@"[ERROR] Overwriting file named '%@'. See module documentation to learn how to specify a downloaded file's filename.",fileName);
+        NSLog(@"[WARN] Overwriting file named '%@'. See module documentation to learn how to specify a downloaded file's filename.",fileName);
         if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:&error] == NO) {
             [self fireErrorEvent:connection error:error];
             return;
@@ -280,6 +280,8 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)issueDownloadComplete:(NSNotification *)note
 {
+    // Not checking for _hasListeners here because this method will only be called
+    // if there is a listener, see _listenerAdded:count: and _listenerRemoved:count:
     [self fireIssueCompleteEvent:note];
 }
 
@@ -287,11 +289,11 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)fireErrorEvent:(NSURLConnection *)connection error:(NSError *)error
 {
-    NKAssetDownload *dnl        = connection.newsstandAssetDownload;
-    NSDictionary *userInfo      = [[dnl userInfo] objectForKey:@"userInfo"];
-    userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
-    
     if ([self _hasListeners:@"error"]) {
+        NKAssetDownload *dnl        = connection.newsstandAssetDownload;
+        NSDictionary *userInfo      = [[dnl userInfo] objectForKey:@"userInfo"];
+        userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
+        
         NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
                                [[dnl issue] name], @"name",
                                userInfo, @"userInfo",
@@ -311,10 +313,10 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
         userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
         
         NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-                               [NSNumber numberWithFloat: totalBytesWritten], @"bytesWritten",
-                               [NSNumber numberWithFloat: expectedTotalBytes], @"totalBytes",
                                [[dnl issue] name], @"name",
                                userInfo, @"userInfo",
+                               [NSNumber numberWithFloat: totalBytesWritten], @"bytesWritten",
+                               [NSNumber numberWithFloat: expectedTotalBytes], @"totalBytes",
                                nil
                                ];
         
@@ -324,11 +326,11 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)fireAssetCompleteEvent:(NSURLConnection *)connection filePath:(NSString *)filePath
 {
-    NKAssetDownload *dnl        = connection.newsstandAssetDownload;
-    NSDictionary *userInfo      = [[dnl userInfo] objectForKey:@"userInfo"];
-    userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
-    
     if ([self _hasListeners:@"assetcomplete"]) {
+        NKAssetDownload *dnl        = connection.newsstandAssetDownload;
+        NSDictionary *userInfo      = [[dnl userInfo] objectForKey:@"userInfo"];
+        userInfo = userInfo ? userInfo : [NSDictionary dictionary]; // userInfo can not be nil when added to dictionary
+        
         NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
                                [[dnl issue] name], @"name",
                                userInfo, @"userInfo",
