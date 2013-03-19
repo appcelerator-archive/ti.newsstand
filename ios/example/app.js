@@ -64,30 +64,34 @@ function eventCallback(e) {
   	Ti.API.info('  Content-Available: ' + e.data['content-available']);
   	
   	if (e.data['content-available'] === 1) {
-  			var name = issues[0].name;
-			var content = issues[0].content;
-			
-			Ti.API.info('Downloading asset for issue: '+name+' from URL: '+content);
-			
-			var issue = Newsstand.getIssue({
-				name: name
+		Newsstand.beginBackgroundDownloadRequests(); 
+
+		var name = issues[0].name;
+		var content = issues[0].content;
+		
+		Ti.API.info('Downloading asset for issue: '+name+' from URL: '+content);
+		
+		var issue = Newsstand.getIssue({
+			name: name
+		});
+		
+		if (!issue) {
+			// if issue is not found then add it
+			issue = Newsstand.addIssue({
+				name: name,
+				date: new Date()
 			});
-			
-			if (!issue) {
-				// if issue is not found then add it
-				issue = Newsstand.addIssue({
-					name: name,
-					date: new Date()
-				});
+		}
+		
+		issue.downloadAsset({
+			url: content,
+			userInfo: {
+				id: 9999,
+				name: 'TESTBACKGROUND'
 			}
-			
-			issue.downloadAsset({
-				url: content,
-				userInfo: {
-					id: 9999,
-					name: 'TESTBACKGROUND'
-				}
-			});
+		});
+
+		Newsstand.endBackgroundDownloadRequests();
   	}
 }
 
