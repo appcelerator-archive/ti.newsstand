@@ -14,6 +14,8 @@
 
 @synthesize username, password;
 
+static UIBackgroundTaskIdentifier backgroundId;
+
 #pragma mark Internal
 
 // this is generated for your module, please do not change it
@@ -38,7 +40,7 @@
 
     // Pending downloads must be reconnected when the app starts or they will be cancelled
     [self checkForPendingDownloads];
-    
+
     NSLog(@"[INFO] %@ loaded",self);
 }
 
@@ -305,6 +307,11 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 
 -(void)fireProgressEvent:(NSURLConnection *)connection totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long)expectedTotalBytes
 {
+    // Do not fire progress events while the application is in the background. 
+    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateBackground) {
+        return;
+    }
+    
     if ([self _hasListeners:@"progress"]) {
         NKAssetDownload *dnl    = connection.newsstandAssetDownload;
         NSDictionary *userInfo  = [[dnl userInfo] objectForKey:@"userInfo"];
@@ -358,6 +365,124 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
 {
     for(NKAssetDownload *asset in [[NKLibrary sharedLibrary] downloadingAssets]) {
         [asset downloadWithDelegate:self];
+    }
+}
+
+/*
+ There are three scenarios that must be accounted for in this module:
+   
+   Application State: Not running
+   Action: Remote Notification received with 'content-available' key and value of 1
+   Result:
+   - Application is started automatically by iOS because it is a Newsstand application
+   - Failure to call beginBackgroundTaskWithExpirationHandler may result in the
+     Titanium app not completely running the javascript code in the app.js
+   - We cannot add any methods in the module to help with this because most
+     likely the javascript code will not get executed before the app is paused
+   
+   Application State: Running, but backgrounded
+   Action: Remote Notification received with 'content-available' key and value of 1
+   Result:
+   - Application is awakened to process the notification
+   - Failure to call beginBackgroundTaskWithExpirationHandler may result in the
+     Titanium app not completely running the javascript code in the notification
+     handler (especially if an XHR request is needed)
+ 
+   Application State: Running and foregrounded
+   Action: Remote Notification received with 'content-available' key and value of 1
+   Result:
+   - Application successfully downloads the assets because it is in the foreground
+     and will not be paused unless backgrounded by the user
+ 
+ The mechanism that allows a Titanium application to run JS and download newsstand content in
+ the background is to leverage the static 'load' method for the module class. This method
+ is invoked whenever the class is added to the Objective-C runtime. This allows us to
+ register for the 'UIApplicationDidFinishLaunchingNotification' which in turn will be
+ used to signal the OS that we may need little more time to complete the Newsstand
+ download.
+ 
+ NOTE: This mechanism provides functionality very similar to the 'onAppCreate' 
+       Kroll annotation available in Android modules.
+ 
+ The key to making this work in all three scenarios is that the application developer
+ * MUST * call 'beginBackgroundDownloadRequests' and 'endBackgroundDownloadRequests'
+ whenever the remote notification callback is processed. 'endBackgroundDownloadRequests' 
+ should be called when the application has completed the assetDownload requests being
+ processed as part of receiving the push notification. This allows an application to issue 
+ XHR requests upon receipt of the notification and then call 'endBackgroundDownloadRequests' 
+ after all of the assetDownload requests have been made. Failure to call 'endBackgroundDownloadRequests' 
+ will most likely result in the application being killed in approximately 10 minutes.
+ 
+*/
+
+-(void)beginBackgroundDownloadRequests:(id)args
+{
+    // Called by an application when it begins issuing downloadAsset requests in
+    // response to a remote notification
+    [TiNewsstandModule beginBackgroundRequests];
+}
+
+-(void)endBackgroundDownloadRequests:(id)args
+{
+    // Called by an application when it ends issuing downloadAsset requests in
+    // response to a remote notification
+    [TiNewsstandModule endBackgroundRequests];
+}
+
++ (void)load
+{
+    // Set the Id for an invalid background Id. This cannot be set during compile time.
+     backgroundId = UIBackgroundTaskInvalid;
+    
+    // Register to receive a notification for the application launching
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onAppCreate:)
+                                                 name:@"UIApplicationDidFinishLaunchingNotification" object:nil];
+}
+
++(void)onAppCreate:(NSNotification *)notification
+{
+    // Determine if the application was launched with launchOptions. If so, then drill down and
+    // get the value for 'content-available'. If the application was started with this key and its
+    // value is '1', then signal the OS to allow this process to continue running in the background
+    // until 'endRequests' is called.
+    
+    NSLog(@"[DEBUG] TiNewsstandModule onAppCreate");
+    NSDictionary *userInfo = [notification userInfo];
+    NSDictionary *launchOptions = [userInfo valueForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"];
+    NSDictionary *aps = [launchOptions objectForKey:@"aps"];
+    BOOL contentAvailable = [TiUtils boolValue:[aps objectForKey:@"content-available"] def:NO];
+    if (contentAvailable) {
+        [TiNewsstandModule beginBackgroundRequests];
+    }
+}
+
++(void)beginBackgroundRequests
+{
+    // If the application is currently running in the background AND we don't already have
+    // an outstanding background request, then signal the OS to allow this process to continue
+    // running in the background.
+    
+    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateBackground) {
+        if (backgroundId == UIBackgroundTaskInvalid) {
+            NSLog(@"[DEBUG] TiNewsstandModule begin background task");
+            
+            backgroundId = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+                NSLog(@"[DEBUG] TiNewstandModule end background task due to expiration");
+                [[UIApplication sharedApplication] endBackgroundTask:backgroundId];
+                backgroundId = UIBackgroundTaskInvalid;
+            }];
+        }
+    }
+}
+
++(void)endBackgroundRequests
+{
+    // Called by an application when it has finished making downloadAssets requests
+    // in response to a remote notification
+    if (backgroundId != UIBackgroundTaskInvalid) {
+        NSLog(@"[DEBUG] TiNewsstandModule end background task");
+        [[UIApplication sharedApplication] endBackgroundTask:backgroundId];
+        backgroundId = UIBackgroundTaskInvalid;
     }
 }
 

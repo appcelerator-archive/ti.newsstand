@@ -90,6 +90,36 @@ Use the `Ti.Network.NOTIFICATION_TYPE_NEWSSTAND` type when calling **registerFor
 	    callback: eventCallback
 	});
 
+To enable your application to download assets in the background in response to a push notification, you *must* wrap 
+your [downloadAsset](issue.html) calls with calls to `beginBackgroundDownloadRequests` and `endBackgroundDownloadRequests`.
+
+For example, the event callback specified for `registerForPushNotifications` might look like the following:
+
+	function eventCallback(e) {
+	  	if (e.data['content-available'] === 1) {
+			Newsstand.beginBackgroundDownloadRequests();
+			var issue = Newsstand.getIssue({
+				name: issues[0].name
+			});	
+			if (!issue) {
+				// if issue is not found then add it
+				issue = Newsstand.addIssue({
+					name: name,
+					date: new Date()
+				});
+			}
+			issue.downloadAsset({
+				url: issues[0].content,
+				userInfo: {
+					id: 9999,
+					name: 'TESTBACKGROUND'
+				}
+			});
+			Newsstand.endBackgroundDownloadRequests();
+	  	}
+	}
+
+
 ## Accessing the Newsstand Module
 
 To access this module from JavaScript, you would do the following:
@@ -105,10 +135,36 @@ The newsstand variable is a reference to the Module object.
 
 Newsstand push notifications are only allowed one background download per day. This function will disable this limit during testing.
 
+__NOTE__: _A development device refers to a device which has been recognized in Xcode Organizer as having the "Use for Development" checkbox enabled._
+
 #### Example
 
 	Newsstand.enableDevMode();
 	
+### void beginBackgroundDownloadRequests()
+
+Signals the start of a series of [downloadAsset](issue.html) calls. This call notifies the device that additional time may
+be needed by the application while running in the background.
+
+#### Example
+
+    Newsstand.beginBackgroundDownloadRequests();
+    issue1.downloadAsset(...);
+    issue2.downloadAsset(...);
+    Newsstand.endBackgroundDownloadRequests();
+
+### void endBackgroundDownloadRequests()
+
+Signals the end of a series of [downloadAsset](issue.html) calls. This call notifies the device that the application no longer
+requires additional time while running in the background.
+
+#### Example
+
+    Newsstand.beginBackgroundDownloadRequests();
+    issue1.downloadAsset(...);
+    issue2.downloadAsset(...);
+    Newsstand.endBackgroundDownloadRequests();
+
 ### [Ti.Newsstand.Issue][] addIssue(args[object]) 
 
 Adds an issues to the library.
@@ -222,8 +278,8 @@ Downloading of assets is not taking place and there is issue content at contentU
 
 ### progress
 
-Occurs if you call downloadAsset and an issue asset is downloading.
-The following event information will be provided:
+Occurs if you call downloadAsset and an issue asset is downloading. This event is only sent when the application
+is running in the foreground. The following event information will be provided:
 
 * name [string]: the unique name of the issue the asset is being downloaded for
 * userInfo [object]: the dictionary of key value pairs that was set when calling `downloadAsset`
