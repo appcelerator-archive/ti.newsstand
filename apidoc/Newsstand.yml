@@ -353,6 +353,8 @@ events:
       
 ---
 name: NewsstandAddIssueProps
+since: "1.0.0"
+platforms: [iphone, ipad]
 summary: A dictionary of properties to pass to the method
 properties:
   - name: name
@@ -367,6 +369,8 @@ properties:
 
 ---
 name: NewsstandGetIssueProps
+since: "1.0.0"
+platforms: [iphone, ipad]
 summary: A dictionary of properties to pass to the method
 properties:
   - name: name
@@ -376,6 +380,8 @@ properties:
 
 ---
 name: NewsstandSetBasicAuthProps
+since: "1.0.0"
+platforms: [iphone, ipad]
 summary: A dictionary of properties to pass to the method
 properties:
   - name: username

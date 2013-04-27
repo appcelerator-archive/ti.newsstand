@@ -63,6 +63,8 @@ properties:
     
 ---
 name: NewsstandDownloadAssetProps
+since: "1.0.0"
+platforms: [iphone, ipad]
 summary: A dictionary of properties to pass to the method
 properties:
   - name: url
