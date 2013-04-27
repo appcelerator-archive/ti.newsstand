@@ -1,0 +1,389 @@
+---
+name: Modules.Newsstand
+summary: The Newsstand module allows you to access Apple's NewsKit APIs
+description: |
+    ### Requirements
+    This module requires iOS 5 or greater
+    
+    ### Newsstand Resources
+    -   [Newsstand for Developers](https://developer.apple.com/newsstand/)
+    -   [Newsstand Kit Framework Reference](https://developer.apple.com/library/ios/#documentation/StoreKit/Reference/NewsstandKit_Framework/_index.html)
+
+    ### Publishing
+    Apple allows you to update your app icon in iTunes connect so that the latest issue can always be displayed. Documentation around setting this up can be found in the [iTunes Connect Developer Guide](https://developer.apple.com/library/ios/#documentation/LanguagesUtilities/Conceptual/iTunesConnect_Guide/14_Newsstand/Newsstand.html).
+
+    ### Getting Started
+
+    View the [Using Titanium Modules](http://docs.appcelerator.com/titanium/latest/#!/guide/Using_Titanium_Modules) document for instructions on getting
+    started with using this module in your application.
+
+    ### Accessing the Newsstand Module
+
+       To access this module from JavaScript, you would do the following:
+
+       	var Newsstand = require("ti.newsstand");
+
+       The newsstand variable is a reference to the Module object.
+
+    ### Setup
+
+    1. Setup the app as a Newsstand app by adding the code below to your tiapp.xml
+    2. Modify the `UINewsstandBindingEdge` and `UINewsstandBindingType` values to get different decorations on the icons. Available options can be found in Apple's [CoreFoundationKeys Documentation](https://developer.apple.com/library/mac/#documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html).
+    3. Add `newsstandicon.png` to the 'Resources/iphone' directory next to appicon.png
+    4. Run the app, you should see it in the Newsstand folder.
+    5. During development, be sure to call <Modules.Newsstand.enableDevMode> to remove the daily download limit.
+
+    tiapp.xml
+
+    	<ios>
+            <plist>
+                <dict>
+                    <key>CFBundleIcons</key>
+                    <dict>
+                        <key>CFBundlePrimaryIcon</key>
+                        <dict>
+                            <key>CFBundleIconFiles</key>
+                            <array>
+                                <string>appicon.png</string>
+                            </array>
+                        </dict>
+                        <key>UINewsstandIcon</key>
+                        <dict>
+                            <key>CFBundleIconFiles</key>
+                            <array>
+                                <string>icon_newsstand.png</string>
+                            </array>
+                            <key>UINewsstandBindingEdge</key>
+                            <string>UINewsstandBindingEdgeLeft</string>
+                            <key>UINewsstandBindingType</key>
+                            <string>UINewsstandBindingTypeMagazine</string>
+                        </dict>
+                    </dict>
+                    <key>UINewsstandApp</key>
+                    <true/>
+                    <key>UIBackgroundModes</key>
+                    <array>
+                        <string>newsstand-content</string>
+                    </array>
+                </dict>
+            </plist>
+        </ios>
+
+    ### Push Notifications
+
+    Push notifications can be sent to the device to notify it that a new issue is available. The notification payload must contain a "content-available" key set to 1. If this is not set, iOS will not allow the application to wake in the background to download a new issue.
+
+    	{
+    	  "aps":{
+    		"content-available":1,
+    	        },
+    	   "device_tokens": ["exampleToken4F2509D125889AED3466F4D1376B26C374190B3974739"]
+    	}
+
+    Use the <Titanium.Network.NOTIFICATION_TYPE_NEWSSTAND> type when calling <Titanium.Network.registerForPushNotifications>
+
+    	Ti.Network.registerForPushNotifications({
+    	    types:[
+    	        Ti.Network.NOTIFICATION_TYPE_NEWSSTAND
+    	    ],
+    	    success: eventSuccess,
+    	    error: eventError,
+    	    callback: eventCallback
+    	});
+
+    To enable your application to download assets in the background in response to a push notification, you *must* wrap 
+    your <Modules.Newsstand.Issue.downloadAsset> calls with calls to <Modules.Newsstand.beginBackgroundDownloadRequests> and <Modules.Newsstand.endBackgroundDownloadRequests>.
+
+    For example, the event callback specified for <Titanium.Network.registerForPushNotifications> might look like the following:
+
+    	function eventCallback(e) {
+    	  	if (e.data['content-available'] === 1) {
+    			Newsstand.beginBackgroundDownloadRequests();
+    			var issue = Newsstand.getIssue({
+    				name: issues[0].name
+    			});	
+    			if (!issue) {
+    				// if issue is not found then add it
+    				issue = Newsstand.addIssue({
+    					name: name,
+    					date: new Date()
+    				});
+    			}
+    			issue.downloadAsset({
+    				url: issues[0].content,
+    				userInfo: {
+    					id: 9999,
+    					name: 'TESTBACKGROUND'
+    				}
+    			});
+    			Newsstand.endBackgroundDownloadRequests();
+    	  	}
+    	}
+    	
+    
+extends: Titanium.Module
+since: "1.0.0"
+platforms: [iphone, ipad]
+excludes:
+    methods: [fireEvent, applyProperties]
+    properties: [bubbleParent]
+
+methods:
+  - name: enableDevMode
+    summary: Newsstand push notifications are only allowed one background download per day. This function will disable this limit for development devices during testing.
+    description: |
+        **Note:** A development device refers to a device which has been recognized in Xcode Organizer as having the "Use for Development" checkbox enabled. 
+        
+        **Example**
+
+            Newsstand.enableDevMode();
+
+  - name: beginBackgroundDownloadRequests
+    summary: Signals the start of a series of <Modules.Newsstand.Issue.downloadAsset> calls. This call notifies the device that additional time may be needed by the application while running in the background.
+    description: |
+        **Example**
+
+            Newsstand.beginBackgroundDownloadRequests();
+            issue1.downloadAsset(...);
+            issue2.downloadAsset(...);
+            Newsstand.endBackgroundDownloadRequests();
+  
+  - name: endBackgroundDownloadRequests
+    summary: Signals the end of a series of <Modules.Newsstand.Issue.downloadAsset> calls. This call notifies the device that the application no longer requires additional time while running in the background.
+    description: |
+        **Example**
+
+            Newsstand.beginBackgroundDownloadRequests();
+            issue1.downloadAsset(...);
+            issue2.downloadAsset(...);
+            Newsstand.endBackgroundDownloadRequests();
+            
+  - name: addIssue
+    summary: Adds an issues to the library.
+    description: |
+        Throws an exception if name and date are invalid. Also throws an exception if you use a name that is already taken by another issue.
+        
+        Returns a <Modules.Newsstand.Issue> representing the issue that was added to the library or undefined if the issues could not be added to the library.
+        
+        **Example**
+
+            var issueDate = new Date();
+            issueDate.setFullYear(2013);
+            issueDate.setMonth(0);
+            issueDate.setDate(14);
+            var issue = Newsstand.addIssue({
+                name: "Magazine-0", 
+                date: issueDate
+        	});
+
+    parameters:
+      - name: props
+        summary: 
+        type: Dictionary<NewsstandAddIssueProps>
+    returns: 
+        type: Modules.Newsstand.Issue
+        
+  - name: getIssue
+    summary: Retrieves an issue from the library via its unique name.
+    description: |
+        Returns a <Modules.Newsstand.Issue> representing the issue or undefined if the issue does not exist in the library.
+
+        **Example**
+
+            var issue = Newsstand.getIssue({
+            	name: "Magazine-0"
+            });
+
+    parameters:
+      - name: props
+        summary: 
+        type: Dictionary<NewsstandGetIssueProps>
+    returns: 
+        type: Modules.Newsstand.Issue
+  
+  - name: removeIssue
+    summary: Removes an issue from the library.
+    description: |
+        **Note:** It is possible to hold on to a <Modules.Newsstand.Issue> even after it is removed from the library. This is not something you want to do, because issues are useless if they are not in the library. Most of the properties of the issue will still be available excelpt `contentURL` which will be undefined. 
+
+        **Example**
+
+            Newsstand.removeIssue(issueToRemove);
+
+    parameters:
+      - name: issue
+        summary: The issue to be removed.
+        type: Modules.Newsstand.Issue
+
+  - name: setBasicAuthentication
+    summary: Sets the username and password that will be used if the <Modules.Newsstand.Issue.downloadAsset> call needs to authenticate.
+    description: |
+        **Example**
+
+            Newsstand.setBasicAuthentication({
+                username: "jalter",
+                password: "password"
+            });
+
+    parameters:
+      - name: props
+        summary:
+        type: Dictionary<NewsstandSetBasicAuthProps>
+
+
+properties:
+  - name: ISSUE_CONTENT_STATUS_NONE
+    summary: |
+        Assets are not downloading for the issue and there is no content at contentURL.
+    type: Number
+    permission: "read-only"
+
+  - name: ISSUE_CONTENT_STATUS_DOWNLOADING
+    summary: |
+        The issue has assets that are currently downloading.
+    type: Number
+    permission: "read-only"
+
+  - name: ISSUE_CONTENT_STATUS_AVAILABLE
+    summary: |
+        Downloading of assets is not taking place and there is issue content at contentURL.
+    type: Number
+    permission: "read-only"
+  
+  - name: issues
+    summary: |
+        Returns an array of <Modules.Newsstand.Issue>s representing the current issues in the library.
+    type: Array
+    permission: "read-only"
+  
+  - name: currentlyReadingIssue
+    summary: |
+        Accesses or sets the newsstand issue that the user is currently reading. If no issue is set, it will be undefined.
+        
+        Newsstand Kit takes this setting into consideration when it purges back issues because of low levels of available flash storage.
+    type: Modules.Newsstand.Issue
+  
+  - name: applicationIconBadgeNumber
+    summary: |
+        Accesses or sets the icon badge number of the app. Instead of displaying a badge number on the app icon, this will set the "new" badge on the app icon if the number is greater than 0.
+    type: Number
+    
+  - name: iconImage
+    summary: |    
+        Sets the image of the application icon.
+    description: |
+        **Note:** If the image is not within the dimensions outlined in the Newsstand Icon section of the [iOS Human Interface Guidelines](http://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html), it may not be displayed.
+        
+        **Note:** Sometimes this does not work on the simulator. Works consistently on device.
+        
+        **Example**
+
+            var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory,'newIcon.png');
+            Newsstand.iconImage = file;
+
+    type: Titanium.Filesystem.File
+    permission: "write-only"
+    
+events:
+  - name: progress
+    summary: Occurs if you call downloadAsset and an issue asset is downloading. This event is only sent when the application is running in the foreground.
+    description: |
+        **Note:** totalBytes only applies to the current file being downloaded.
+    properties:
+      - name: name
+        type: String
+        summary: The unique name of the issue the asset is being downloaded for.
+        
+      - name: userInfo
+        type: Object
+        summary: The dictionary of key value pairs that was set when calling <Modules.Newsstand.Issue.downloadAsset>.
+        
+      - name: bytesWritten
+        type: Number
+        summary: The number of bytes downloaded.
+        
+      - name: totalBytes
+        type: Number
+        summary: The total number of bytes to download for the current asset.
+        
+  - name: error
+    summary: Occurs when there is an error while downloading an asset.
+    properties:
+      - name: name
+        type: String
+        summary: The unique name of the issue the asset is being downloaded for.
+
+      - name: userInfo
+        type: Object
+        summary: The dictionary of key value pairs that was set when calling <Modules.Newsstand.Issue.downloadAsset>.
+
+      - name: description
+        type: String
+        summary: Description of the error.
+
+      - name: code
+        type: String
+        summary: The error code.
+
+  - name: assetcomplete
+    summary: Occurs when each asset download completes.
+    excludes: { properties: [ bubbles, cancelBubble ] }
+    properties:
+      - name: name
+        type: String
+        summary: The unique name of the issue the asset is being downloaded for.
+
+      - name: userInfo
+        type: Object
+        summary: The dictionary of key value pairs that was set when calling <Modules.Newsstand.Issue.downloadAsset>.
+
+      - name: filePath
+        type: String
+        summary: The location of the file that was downloaded.
+        
+        
+  - name: issuecomplete
+    summary: Occurs when all of the asset downloads that have been started for an issue are complete. This could be a successful completion or error.
+    excludes: { properties: [ bubbles, cancelBubble ] }
+    properties:
+      - name: name
+        type: String
+        summary: The unique name of the issue.
+          
+      
+---
+name: NewsstandAddIssueProps
+summary: A dictionary of properties to pass to the method
+properties:
+  - name: name
+    summary: The unique name of the issue to be added to the library. 
+    type: String
+    optional: false
+
+  - name: date
+    summary: The release date of the issue.
+    type: Date
+    optional: false
+
+---
+name: NewsstandGetIssueProps
+summary: A dictionary of properties to pass to the method
+properties:
+  - name: name
+    summary: The unique name of the issue to be added to the library.
+    type: String
+    optional: false
+
+---
+name: NewsstandSetBasicAuthProps
+summary: A dictionary of properties to pass to the method
+properties:
+  - name: username
+    summary:
+    type: String
+    optional: false
+    
+  - name: password
+    summary:
+    type: String
+    optional: false

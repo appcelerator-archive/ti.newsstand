@@ -1,0 +1,85 @@
+---
+name: Modules.Newsstand.Issue
+summary: A <Modules.Newsstand> object which represents an issue from the Newsstand library.
+extends: Titanium.Proxy
+plarforms: [iphone, ipad]
+excludes:
+    methods: [addEventListener, fireEvent, removeEventListener, applyProperties]
+    properties: [bubbleParent]
+createable: false
+    
+methods:
+  - name: downloadAsset
+    summary: Downloads an asset for this issue. This connection is managed by the system. This allows the download to run in the background even when the app is not running. Download progress and errors can be captured using event listeners.
+    description: |
+        **Note:** Throws an exception if called twice to download the same asset for a single issue.
+    
+        **Example**
+
+            issue.downloadAsset({
+                url:contentURL,
+                filename:'TEST.TST',
+                userInfo:{
+                    id:1234,
+                    name:'TEST1'
+                }
+            });
+            
+    parameters:
+      - name: props
+        summary: 
+        type: Dictionary<NewsstandDownloadAssetProps>
+
+properties:
+  - name: name
+    summary: The unique name of the issue
+    type: String
+    permission: "read-only"
+    
+  - name: date
+    summary: The date of the issue
+    type: String
+    permission: "read-only"
+        
+  - name: status
+    summary: The status of the issue
+    description: |
+        Possible statuses:
+
+        * <Modules.Newsstand.ISSUE_CONTENT_STATUS_NONE>
+        * <Modules.Newsstand.ISSUE_CONTENT_STATUS_DOWNLOADING>
+        * <Modules.Newsstand.ISSUE_CONTENT_STATUS_AVAILABLE>
+    type: String
+    permission: "read-only"
+          
+  - name: contentURL
+    summary: The contentURL of the issue
+    description: |
+        This is the location assets downloaded for the issue will be saved.
+        
+        **Note:** contentURL will be undefined after an issue is removed from the library.
+    type: String
+    permission: "read-only"
+    
+---
+name: NewsstandDownloadAssetProps
+summary: A dictionary of properties to pass to the method
+properties:
+  - name: url
+    summary: Location of the asset to be downloaded
+    type: String
+    optional: false
+   
+  - name: userInfo
+    summary: A dictionary of properties that can be passed through with the request to the event listeners. (optional)
+    description: |
+        **Warning:** Do not include anything more than simple key value pairs. Including Titanium objects in userInfo will cause errors.
+    type: Dictionary
+    optional: true
+
+  - name: filename
+    summary: The name of the file to be downloaded. If no name is specified here, the filename will be the last component of the url. (optional)
+    type: String 
+    optional: true
+
+  
