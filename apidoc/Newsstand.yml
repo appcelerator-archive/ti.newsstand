@@ -253,7 +253,7 @@ properties:
   - name: issues
     summary: |
         Returns an array of <Modules.Newsstand.Issue>s representing the current issues in the library.
-    type: Array
+    type: Array<Modules.Newsstand.Issue>
     permission: "read-only"
   
   - name: currentlyReadingIssue
@@ -327,7 +327,6 @@ events:
 
   - name: assetcomplete
     summary: Occurs when each asset download completes.
-    excludes: { properties: [ bubbles, cancelBubble ] }
     properties:
       - name: name
         type: String
@@ -344,7 +343,6 @@ events:
         
   - name: issuecomplete
     summary: Occurs when all of the asset downloads that have been started for an issue are complete. This could be a successful completion or error.
-    excludes: { properties: [ bubbles, cancelBubble ] }
     properties:
       - name: name
         type: String
