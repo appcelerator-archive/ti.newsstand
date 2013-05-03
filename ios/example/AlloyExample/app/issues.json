@@ -1,0 +1,25 @@
+{
+	"issues":[
+		{
+			"name": "Magazine-0",
+			"title": "Magazine Issue 0",
+			"date": "2012-01-15",
+			"cover": "http://appcelerator-eap.s3.amazonaws.com/Modules/Newsstand/images/magazine-0.png",
+			"content": "http://appcelerator-eap.s3.amazonaws.com/Modules/Newsstand/images/magazine-0.pdf"
+		},
+		{
+			"name": "Magazine-1",
+			"title": "Magazine Issue 1",
+			"date": "2012-02-15",
+			"cover": "http://appcelerator-eap.s3.amazonaws.com/Modules/Newsstand/images/magazine-1.png",
+			"content": "http://appcelerator-eap.s3.amazonaws.com/Modules/Newsstand/images/magazine-1.pdf"
+		},
+		{
+			"name": "Magazine-2",
+			"title": "Magazine Issue 2",
+			"date": "2012-03-15",
+			"cover": "http://appcelerator-eap.s3.amazonaws.com/Modules/Newsstand/images/magazine-2.png",
+			"content": "http://appcelerator-eap.s3.amazonaws.com/Modules/Newsstand/images/magazine-2.pdf"
+		}
+	]
+}
