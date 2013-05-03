@@ -98,7 +98,7 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
     // An exception is thrown if the issue already exists, and the rest of the js function
     // is not executed if we let it fail naturally
     if ([[NKLibrary sharedLibrary] issueWithName:name]) {
-        NSLog(@"[ERROR] there is already an issue for this name -> '%@'",name);
+        NSLog(@"[WARN] there is already an issue for this name -> '%@'",name);
         return nil;
     }
     
@@ -129,7 +129,7 @@ MAKE_SYSTEM_PROP(ISSUE_CONTENT_STATUS_AVAILABLE, NKIssueContentStatusAvailable);
     NKIssue *nkIssue = [[NKLibrary sharedLibrary] issueWithName:name];
     // nkIssue my be nil if the issue couldn't be retrieved
     if (nkIssue == nil) {
-        NSLog(@"[ERROR] Issue named '%@' does not exist in library",name);
+        NSLog(@"[WARN] Issue named '%@' does not exist in library",name);
         return nil;
     }
     
