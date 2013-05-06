@@ -1,0 +1,18 @@
+<Alloy>
+	<Window class="container" onOpen="onWinOpen">
+		<NavigationGroup id="navgroup" platform="ios">
+			<Window id="win">
+				<TitleControl>
+					<ActivityIndicator id="activityIndicator" message="Loading..."/>
+				</TitleControl>
+				<LeftNavButton>
+					<Button id="deleteButton" onClick="onDelete"></Button>
+				</LeftNavButton>
+				<RightNavButton>
+					<Button id="refreshButton" onClick="onRefresh"></Button>
+				</RightNavButton>
+				<TableView id="issueList" onClick="onTableClick"></TableView>
+			</Window>
+		</NavigationGroup>
+	</Window>
+</Alloy>

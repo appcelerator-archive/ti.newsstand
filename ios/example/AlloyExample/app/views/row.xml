@@ -1,0 +1,10 @@
+<Alloy>
+	<TableViewRow id="row">
+		<View id="rowView">
+			<ImageView id="thumbnailView"></ImageView>
+			<Label id="titleLabel"></Label>
+			<Label id="subLabel"></Label>
+			<ProgressBar id="progressBar"></ProgressBar>
+		</View>
+	</TableViewRow>
+</Alloy>

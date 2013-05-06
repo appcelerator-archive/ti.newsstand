@@ -1,0 +1,5 @@
+<Alloy>
+	<Window class="container" id="previewWin">
+		<WebView id="webView"></WebView>
+	</Window>
+</Alloy>
