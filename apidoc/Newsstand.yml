@@ -51,7 +51,7 @@ description: |
                         <dict>
                             <key>CFBundleIconFiles</key>
                             <array>
-                                <string>icon_newsstand.png</string>
+                                <string>newsstandicon.png</string>
                             </array>
                             <key>UINewsstandBindingEdge</key>
                             <string>UINewsstandBindingEdgeLeft</string>

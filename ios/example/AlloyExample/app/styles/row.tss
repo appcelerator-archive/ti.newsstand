@@ -1,0 +1,40 @@
+"#row": {
+    backgroundColor: "white",
+    height: 60
+},
+"#rowView": {
+    
+},
+"#thumbnailView": {
+    left: 10,
+    top: 10,
+    width: 40,
+    height: 40
+},
+"Label": {
+    left: 60
+},
+"#titleLabel": {
+    bottom: "53%",
+    font: {
+        fontSize: 18,
+        fontWeight: "bold"
+    }
+},
+"#subLabel": {
+    top: "53%",
+    color: "#AAA",
+    opacity: 0,
+    font: {
+        fontSize: 16
+    }
+},
+"#progressBar": {
+    left: 60,
+    right: 10,
+    top: "53%",
+    height: 20,
+    min:0,
+    max:1,
+    value:0,
+}

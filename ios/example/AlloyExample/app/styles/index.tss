@@ -1,0 +1,13 @@
+".container": {
+    backgroundColor:"white"
+},
+"#deleteButton": {
+    systemButton: Ti.UI.iPhone.SystemButton.TRASH
+},
+"#refreshButton": {
+    systemButton: Ti.UI.iPhone.SystemButton.REFRESH
+},
+"#activityIndicator": {
+    color: "white",
+    font: { fontSize:12 },
+}
