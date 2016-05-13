@@ -2,6 +2,8 @@
 
 This is the Newsstand Module for Titanium.
 
+> This has been archived as this API is no longer supported.
+
 ## Contributors
 
 * Pedro Enrique
