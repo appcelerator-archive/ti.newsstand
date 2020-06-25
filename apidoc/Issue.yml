@@ -7,24 +7,24 @@ excludes:
     methods: [addEventListener, fireEvent, removeEventListener, applyProperties]
     properties: [bubbleParent]
 createable: false
-    
 methods:
   - name: downloadAsset
     summary: Downloads an asset for this issue. This connection is managed by the system. This allows the download to run in the background even when the app is not running. Download progress and errors can be captured using event listeners.
     description: |
         **Note:** Throws an exception if called twice to download the same asset for a single issue.
-    
+
         **Example**
 
-            issue.downloadAsset({
-                url:contentURL,
-                filename:'TEST.TST',
-                userInfo:{
-                    id:1234,
-                    name:'TEST1'
-                }
-            });
-            
+        ``` javascript
+        issue.downloadAsset({
+            url:contentURL,
+            filename:'TEST.TST',
+            userInfo:{
+                id:1234,
+                name:'TEST1'
+            }
+        });
+        ``` 
     parameters:
       - name: props
         summary: 
